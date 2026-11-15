@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elicitation Lab — the form nobody could have designed in advance</title>
+<meta name="description" content="You cannot know the fields in advance. A live model turns one sentence — even an 'Other' — into a short, pre-filled elicited form, or into a dashboard instead of a form.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/lab/tokens.css">
+<link rel="stylesheet" href="/lab/shared.css">
+<link rel="stylesheet" href="/lab/lab.css">
+</head>
+<body>
+<header class="hdr"><div class="wrap nav">
+<a class="brand" href="/">ARTHUR<span class="dot">.</span>SOUZA<span class="dot">.</span>RODRIGUES <span class="dot">/</span> <span class="proj">ELICITATION·LAB</span></a>
+<nav class="nav-links">
+  <a href="#lab" class="is-current">Lab</a>
+  <a href="#why">Why</a>
+  <a href="#composer">Compose</a>
+  <a href="https://modelcontextprotocol.io/specification/2025-06-18/client/elicitation" class="keep">Spec →</a>
+</nav>
+</div></header>
+
+<section class="hero wrap">
+<p class="eyebrow rise">/ Live<span class="sep">·</span>gpt-5.6-luna<span class="sep">·</span>elicitation/create<span class="sep">·</span>JSON Schema</p>
+<h1 class="h rise d1">You can't know the fields in advance. So the model <span class="mark">invents them</span> — and pre-fills them.</h1>
+<p class="lede rise d2">Someone ticks <em>Other</em> and writes a paragraph. A lawyer needs four facts. A supervisor wants a dashboard, not a paragraph. None of that fits a form somebody designed last year. Here, the questions are written at request time, already answered where the facts exist.</p>
+<div class="hero-actions rise d3">
+  <a class="btn btn-primary" href="#composer">Write a prompt <span class="arr">→</span></a>
+  <button class="btn btn-quiet" id="surprise" type="button">Show me the “Other” case</button>
+  <span class="kbd">buttons are outlined · chips look tappable · everything is labelled</span>
+</div>
+<p class="stepline rise d4" style="margin-top:22px">Prompt <span class="arr">→</span> invented fields <span class="arr">→</span> pre-filled form <span class="arr">→</span> <b>dashboard view</b></p>
+</section>
+
+<!-- ============ THE THREE ADVANTAGES ============ -->
+<section id="why" class="wrap" style="padding-bottom:6px">
+<div class="teach rise">
+  <div class="lead">
+    <p class="sec-label"><span class="sq"></span>/ The whole point</p>
+    <h2>A static form has to guess every field before the first user arrives. This one doesn't.</h2>
+    <p>Elicitation is where a tool stops and asks a human. The old constraint was that someone had to author the questions up front — so intakes grew to forty fields to cover every case, and still had an <span class="mark">Other</span> box that collected nothing useful.</p>
+    <p>Three things fall out of generating the questions instead: you never enumerate the fields, the form gets <strong>shorter and pre-filled</strong> because the facts are already in the request, and the answer can be rendered as something that isn't a form at all.</p>
+  </div>
+
+  <article class="advantage">
+    <span class="n">01</span>
+    <h3>Nobody knows the fields ex ante</h3>
+    <p>“Other” has no schema. The model reads what was written and invents the four questions this matter needs — and no others.</p>
+    <pre class="mini"><span class="dim">static form</span> 40 fields, one of them
+<span class="dim">            </span> “Other: ______”
+<b>✗ no housing column, no date</b>
+<span class="dim">generated</span> legal_issue, hearing_date
+<span class="y">5 fields, invented</span></pre>
+  </article>
+
+  <article class="advantage">
+    <span class="n">02</span>
+    <h3>Facts already known are pre-answered</h3>
+    <p>The paragraph is mined for facts. They arrive ticked, with their source shown. The person confirms instead of retyping — and the form is short because most of it is already done.</p>
+    <pre class="mini"><span class="dim">from the letter</span>
+✓ eviction  <span class="y">ticked</span>
+✓ 19 Nov 26 <span class="y">ticked</span>
+✓ 2 children<span class="y">ticked</span>
+<span class="dim">only 3 questions remain</span></pre>
+  </article>
+
+  <article class="advantage">
+    <span class="n">03</span>
+    <h3>New visual objects, not just fields</h3>
+    <p>“Summarise this case, but not as text.” The same answers are rendered as a dashboard — metrics, a pressure bar, tags — an object no one had built for this case before.</p>
+    <pre class="mini">deadline pressure <b>8/10</b>
+<span class="y">████████</span><span class="dim">░░</span>  (−9 days)
+risk  <b>high</b>   hours <b>6</b>
+<span class="dim">rendered from the answers</span></pre>
+  </article>
+</div>
+</section>
+
+<!-- ============ COMPOSER ============ -->
+<section id="composer" class="wrap section-gap">
+  <div class="composer rise">
+    <div class="ph">
+      <span class="sec-label"><span class="sq"></span>Prompt composer</span>
+      <span class="mono muted" style="font-size:10.5px;font-weight:500" id="model-tag">gpt-5.6-luna · structured output</span>
+    </div>
+    <div class="body">
+      <div class="compose-main">
+        <label class="fl" for="prompt">What do you need to know? <span class="hint">write it the way the person would say it</span></label>
+        <textarea id="prompt" rows="3" placeholder="Add your request here…"></textarea>
+        <div class="bar">
+          <button class="btn btn-primary" id="generate" type="button">Generate <span class="arr">→</span></button>
+          <button class="btn btn-outline" id="random" type="button">Random request</button>
+          <button class="btn btn-quiet" id="invent" type="button">Invent one for me</button>
+          <span class="count" id="count">0 / 600</span>
+        </div>
+      </div>
+      <div class="side">
+        <label class="fl" for="practice">Route to</label>
+        <select id="practice" class="select-input"><option value="">Let the model decide</option></select>
+        <p class="hint-line">The model may only pick from these practices — it cannot invent one.</p>
+      </div>
+    </div>
+    <div class="status" id="status" aria-live="polite">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span id="status-text">Inventing fields…</span>
+      <span class="t" id="status-time"></span>
+    </div>
+    <div class="examples-head">
+      <span class="sec-label"><span class="sq"></span>Examples — each shows a different advantage</span>
+    </div>
+    <div class="examples" id="examples"></div>
+  </div>
+</section>
+
+<!-- ============ THE GENERATED OBJECT ============ -->
+<section id="lab" class="wrap section-gap" tabindex="-1">
+  <div class="board" id="board">
+    <div class="stat"><span class="v" id="s-fields">0</span><span class="k">Fields invented</span></div>
+    <div class="stat"><span class="v" id="s-prefilled">0</span><span class="k">Pre-filled from facts</span></div>
+    <div class="stat"><span class="v" id="s-widgets">0</span><span class="k">Widgets chosen</span></div>
+    <div class="stat hi"><span class="v" id="s-ms">—</span><span class="k">Last draft (ms)</span></div>
+  </div>
+
+  <div class="result-split section-gap">
+    <!-- the elicited object -->
+    <section class="dialog" id="dialog" aria-live="polite">
+      <div class="dialog-head">
+        <div>
+          <p class="sec-label"><span class="sq"></span>Elicitation request</p>
+          <h2 id="d-title">Nothing generated yet</h2>
+        </div>
+        <span class="ref" id="d-ref" hidden></span>
+      </div>
+      <div class="dialog-tabs" role="tablist" id="view-tabs" hidden>
+        <button role="tab" aria-selected="true" data-view="form">Form</button>
+        <button role="tab" aria-selected="false" data-view="view">View</button>
+      </div>
+
+      <div class="dialog-body">
+        <p class="d-msg" id="d-msg">Write a prompt above and the model will invent the fields, the widgets, and — if you ask for it — a view that isn't a form.</p>
+
+        <!-- why this form exists -->
+        <div class="novel" id="novel" hidden></div>
+
+        <!-- facts already known -->
+        <div class="facts" id="facts" hidden>
+          <div class="facts-head">
+            <span class="sec-label"><span class="sq"></span><span id="facts-headline">Already known</span></span>
+            <span class="src" id="facts-source"></span>
+          </div>
+          <div class="facts-body" id="facts-body"></div>
+        </div>
+
+        <div class="fields" id="d-form"></div>
+
+        <div class="checklist" id="d-checks" hidden>
+          <div class="check-head">
+            <span class="sec-label"><span class="sq"></span>Gates</span>
+            <span class="prog" id="check-prog"></span>
+          </div>
+          <div id="check-list"></div>
+        </div>
+
+        <div class="view" id="d-view" hidden></div>
+      </div>
+
+      <div class="actions">
+        <div class="actions-top">
+          <span class="fl">Response</span>
+          <div class="seg" id="action" role="group" aria-label="Response action">
+            <button type="button" aria-pressed="true" data-v="accept">Accept</button>
+            <button type="button" aria-pressed="false" data-v="decline">Decline</button>
+            <button type="button" aria-pressed="false" data-v="cancel">Cancel</button>
+          </div>
+        </div>
+        <p class="note" id="actnote">Returns the content object. Required fields must be filled before validating.</p>
+        <div class="row">
+          <button class="btn btn-primary" id="submit" type="button" disabled>Validate <span class="arr">→</span></button>
+          <button class="btn btn-outline" id="reset" type="button">Reset answers</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- what the model decided -->
+    <aside class="side-col">
+      <section class="panel">
+        <div class="ph"><span class="sec-label"><span class="sq"></span>What the model decided</span><span class="mono muted" id="decided-ref">—</span></div>
+        <div class="pb" id="decided"><p class="hint-line">Department, routing, widget choices and timing appear here after you generate.</p></div>
+      </section>
+
+      <section class="panel payload">
+        <div class="tabs" role="tablist" id="tabs">
+          <button role="tab" aria-selected="true" data-tab="schema">Schema</button>
+          <button role="tab" aria-selected="false" data-tab="response">Response</button>
+          <button role="tab" aria-selected="false" data-tab="request">Prompt sent</button>
+          <button role="tab" aria-selected="false" data-tab="envelope">JSON-RPC</button>
+        </div>
+        <div class="ph"><span class="sec-label"><span class="sq"></span><span id="tab-label">requestedSchema</span></span><button class="btn btn-sm btn-outline" id="copy" type="button">Copy</button></div>
+        <pre class="block" id="payload"></pre>
+        <div class="st"><span id="valid">—</span><span id="bytes"></span></div>
+      </section>
+    </aside>
+  </div>
+</section>
+
+<section class="cta" style="margin-top:calc(48px*var(--space-scale))"><div class="wrap">
+  <p class="sec-label"><span class="sq"></span>/ Why this matters</p>
+  <h2>Forms that are short because they are smart, not because they are incomplete.</h2>
+  <p>Pre-filled fields, invented widgets and generated views are how an intake stops being a tax on the person filling it in — while the server still validates every answer against the schema it just wrote.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+    <a class="btn btn-primary" href="#composer">Try a prompt <span class="arr">→</span></a>
+    <a class="btn" href="https://modelcontextprotocol.io/specification/2025-06-18/client/elicitation">Read the spec →</a>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="foot-top"><span class="c">© MMXXVI · Arthur Souza Rodrigues · New York · São Paulo</span><div class="foot-social"><a href="/api/lab/meta">API</a><a href="https://www.val.town/x/arthrod/elicitation-lab-real">Source</a></div></div>
+  <p class="disclaimer"><strong>Attorney advertising.</strong> Illustrative workflows with fictional details; nothing is stored and no court, agency or client system is contacted.
+  Schemas are generated by Val Town's shared OpenAI proxy (100 requests/day, <span class="code">gpt-5.6-luna</span>, model may be substituted) and normalised server-side before validation. Use fictional details.</p>
+</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="/lab/app.js"></script>
+</body>
+</html>
