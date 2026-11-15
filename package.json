@@ -1,0 +1,17 @@
+{
+  "name": "elicitation-lab-real",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Elicitation Lab: a Val Town val that turns plain-English clinical requests into validated MCP elicitation/create schemas.",
+  "scripts": {
+    "test": "deno task test",
+    "check": "deno check main.http.ts lab/model.ts lab/bindings.ts backend/*.ts scripts/*.ts",
+    "lint": "deno lint",
+    "fmt": "deno fmt --check",
+    "verify": "deno run --allow-env --allow-read --allow-import --allow-net scripts/verify-page.ts && deno run --allow-env --allow-read --allow-import --allow-net scripts/verify-render.ts && deno run --allow-env --allow-read --allow-import --allow-net scripts/check-render.ts"
+  },
+  "engines": {
+    "deno": ">=2.0.0"
+  }
+}
