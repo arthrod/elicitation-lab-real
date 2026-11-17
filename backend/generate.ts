@@ -1,5 +1,4 @@
-import { ValTownOpenAI } from "https://esm.town/v/std/openai/main.ts";
-import type OpenAI from "npm:openai";
+import type OpenAI from "openai";
 import { DIRECTIVE_REFERENCE } from "../lab/bindings.ts";
 import { type Chat, normalizePlan, type Plan, systemPrompt } from "../lab/model.ts";
 import { CATALOG_REFERENCE, ELEMENT_TYPES } from "./catalog.ts";
@@ -166,7 +165,20 @@ export type Draft = {
 
 export type DraftFailure = { error: string; hint?: string; transcript: Chat[]; source: "error" };
 
-const client = () => new ValTownOpenAI({}) as unknown as OpenAI;
+/**
+ * OpenAI client per runtime. On Val Town (Deno) use the shared proxy — no API
+ * key needed; on a common Node server use the standard SDK, which reads
+ * OPENAI_API_KEY (and optional OPENAI_BASE_URL) from the environment. The
+ * Val Town import stays dynamic so Node never tries to resolve the https URL.
+ */
+async function client(): Promise<OpenAI> {
+  if (typeof (globalThis as { Deno?: unknown }).Deno !== "undefined") {
+    const { ValTownOpenAI } = await import("https://esm.town/v/std/openai/main.ts");
+    return new ValTownOpenAI({}) as unknown as OpenAI;
+  }
+  const { default: OpenAISDK } = await import("openai");
+  return new OpenAISDK();
+}
 
 export async function draftPlan(prompt: string, practiceId?: string): Promise<Draft | DraftFailure> {
   const transcript: Chat[] = [
@@ -181,7 +193,7 @@ export async function draftPlan(prompt: string, practiceId?: string): Promise<Dr
   ];
   const started = Date.now();
   try {
-    const response = await client().chat.completions.create({
+    const response = await (await client()).chat.completions.create({
       model: MODEL,
       max_completion_tokens: 4000,
       messages: transcript as never,
@@ -368,7 +380,7 @@ export async function inventRequest(seen: string[] = []): Promise<RandomRequest 
     },
   ];
   try {
-    const response = await client().chat.completions.create({
+    const response = await (await client()).chat.completions.create({
       model: MODEL,
       max_completion_tokens: 400,
       messages: transcript as never,

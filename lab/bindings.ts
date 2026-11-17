@@ -16,8 +16,8 @@
  * The directives themselves are `@json-render/directives`' `standardDirectives`;
  * we only adapt their calling convention, never reimplement them.
  */
-import { createDirectiveRegistry, resolvePropValue } from "npm:@json-render/core@0.22.0";
-import { standardDirectives } from "npm:@json-render/directives@0.22.0";
+import { createDirectiveRegistry, resolvePropValue } from "@json-render/core";
+import { standardDirectives } from "@json-render/directives";
 
 export const directiveNames = standardDirectives.map((d) => d.name);
 

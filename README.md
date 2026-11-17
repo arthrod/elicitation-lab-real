@@ -60,6 +60,17 @@ curl -X POST "$LAB_URL/api/lab/draft" \
   -d '{"prompt":"Neurology pre-thrombolysis checklist with NIHSS","hospitalId":"northshore"}'
 ```
 
+## Run on your own server
+
+The same app also runs on any common Node server — no Val Town needed:
+
+```sh
+npm install
+OPENAI_API_KEY=sk-... npm start   # PORT env var, default 8000
+```
+
+`server.ts` is the Node entry point (`@hono/node-server` + static files from disk); `main.http.ts` remains the Val Town entry. On Val Town the shared OpenAI proxy is used automatically; on your own server set `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`). `package.json`/`server.ts` are excluded from the val sync via `.vtignore`.
+
 ## OpenAI usage
 
 Generation goes through Val Town's shared OpenAI integration (`https://esm.town/v/std/openai/main.ts`) — no API key required, `gpt-5.6-luna` by default, 100 requests/day per user, and the proxy may substitute models. To lift the limit, set your own key:
