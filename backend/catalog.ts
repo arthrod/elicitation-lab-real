@@ -14,10 +14,10 @@
  * additions, declared the way the skill documents extending a catalog.
  * Implementations are drawn in this page's design system (no Tailwind build).
  */
-import { autoFixSpec, defineCatalog } from "npm:@json-render/core@0.22.0";
-import { schema } from "npm:@json-render/react@0.22.0/schema";
-import { shadcnComponentDefinitions } from "npm:@json-render/shadcn@0.22.0/catalog";
-import { z } from "npm:zod@4";
+import { autoFixSpec, defineCatalog } from "@json-render/core";
+import { schema } from "@json-render/react/schema";
+import { shadcnComponentDefinitions } from "@json-render/shadcn/catalog";
+import { z } from "zod";
 
 const shadcn = shadcnComponentDefinitions as Record<string, { props: z.ZodType; description?: string }>;
 

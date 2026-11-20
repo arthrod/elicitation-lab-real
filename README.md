@@ -60,11 +60,24 @@ curl -X POST "$LAB_URL/api/lab/draft" \
   -d '{"prompt":"Neurology pre-thrombolysis checklist with NIHSS","hospitalId":"northshore"}'
 ```
 
+## Run on your own server
+
+The same app also runs on any common Node server — no Val Town needed:
+
+```sh
+npm install
+MISTRAL_API_KEY=... npm start     # or OPENAI_API_KEY=sk-... — PORT env var, default 8000
+```
+
+`server.ts` is the Node entry point (`@hono/node-server` + static files from disk); `main.http.ts` remains the Val Town entry. On your own server, generation uses **`MISTRAL_API_KEY`** if set (Mistral API, model `mistral-large-latest` — override with `MISTRAL_MODEL` / `MISTRAL_BASE_URL`), otherwise `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`). On Val Town the shared OpenAI proxy is used automatically unless `MISTRAL_API_KEY` is set on the val. `package.json`/`server.ts` are excluded from the val sync via `.vtignore`.
+
 ## OpenAI usage
 
 Generation goes through Val Town's shared OpenAI integration (`https://esm.town/v/std/openai/main.ts`) — no API key required, `gpt-5.6-luna` by default, 100 requests/day per user, and the proxy may substitute models. To lift the limit, set your own key:
 
 👉 Add OPENAI_API_KEY here: https://www.val.town/x/arthrod/elicitation-lab-real/environment-variables?key=OPENAI_API_KEY
+
+On any runtime, setting `MISTRAL_API_KEY` takes precedence and routes generation to Mistral's API instead.
 
 ## Layout
 

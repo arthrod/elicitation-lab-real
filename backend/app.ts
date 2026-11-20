@@ -1,4 +1,4 @@
-import { Hono } from "npm:hono@4.13.12";
+import { Hono } from "hono";
 import { draftApi } from "./draft.ts";
 import { labApi } from "./lab.ts";
 

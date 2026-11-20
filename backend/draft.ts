@@ -1,4 +1,4 @@
-import { Hono } from "npm:hono@4.13.12";
+import { Hono } from "hono";
 import { type Field, matterRef, starterPlans, systemPrompt } from "../lab/model.ts";
 import { CATALOG_REFERENCE, EXAMPLE_SPEC } from "./catalog.ts";
 import { DIRECTIVE_REFERENCE } from "../lab/bindings.ts";

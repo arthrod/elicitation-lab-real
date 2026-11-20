@@ -15,7 +15,7 @@
  * Repair is deliberately conservative: it moves values it can place, and it
  * never invents a value to satisfy a required prop.
  */
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { componentDefinitions, type JsonElement, type JsonSpec } from "./catalog.ts";
 
 type Def = { props: z.ZodType; description?: string };

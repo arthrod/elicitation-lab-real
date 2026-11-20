@@ -1,6 +1,18 @@
 {
   "$schema": "https://raw.githubusercontent.com/denoland/deno/98f62cee78e85bfc47c62ed703777c6bc8794f1c/cli/schemas/config-file.v1.json",
   "lock": false,
+  "imports": {
+    "hono": "npm:hono@4.13.12",
+    "openai": "npm:openai@^7.59.0",
+    "zod": "npm:zod@^4.6.7",
+    "@json-render/core": "npm:@json-render/core@0.22.0",
+    "@json-render/directives": "npm:@json-render/directives@0.22.0",
+    "@json-render/react": "npm:@json-render/react@0.22.0",
+    "@json-render/react/schema": "npm:@json-render/react@0.22.0/schema",
+    "@json-render/shadcn": "npm:@json-render/shadcn@0.22.0",
+    "@json-render/shadcn/catalog": "npm:@json-render/shadcn@0.22.0/catalog",
+    "@hono/node-server": "npm:@hono/node-server@^2.1.9"
+  },
   "tasks": {
     "test": "VAL_TOWN_API_KEY=offline-dummy valtown=offline-dummy deno test --allow-env --allow-read --allow-import"
   },

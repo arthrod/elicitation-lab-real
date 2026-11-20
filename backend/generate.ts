@@ -1,5 +1,4 @@
-import { ValTownOpenAI } from "https://esm.town/v/std/openai/main.ts";
-import type OpenAI from "npm:openai";
+import type OpenAI from "openai";
 import { DIRECTIVE_REFERENCE } from "../lab/bindings.ts";
 import { type Chat, normalizePlan, type Plan, systemPrompt } from "../lab/model.ts";
 import { CATALOG_REFERENCE, ELEMENT_TYPES } from "./catalog.ts";
@@ -166,7 +165,54 @@ export type Draft = {
 
 export type DraftFailure = { error: string; hint?: string; transcript: Chat[]; source: "error" };
 
-const client = () => new ValTownOpenAI({}) as unknown as OpenAI;
+/** Read an env var on either runtime (Deno.env or process.env). */
+function readEnv(key: string): string | undefined {
+  const g = globalThis as {
+    Deno?: { env: { get(k: string): string | undefined } };
+    process?: { env: Record<string, string | undefined> };
+  };
+  return g.Deno?.env.get(key) ?? g.process?.env[key];
+}
+
+/** Mistral defaults when MISTRAL_API_KEY is present in the environment. */
+const MISTRAL_MODEL = "mistral-large-latest";
+// OpenAI-SDK-compatible endpoint, per Mistral's docs.
+const MISTRAL_BASE_URL = "https://api.mistral.ai/openai/v1";
+
+type AiClient = { client: OpenAI; model: string; jsonSchema: boolean };
+
+/**
+ * Pick the model backend from the environment:
+ * - MISTRAL_API_KEY set → Mistral via its OpenAI-compatible endpoint using the
+ *   standard SDK (MISTRAL_BASE_URL / MISTRAL_MODEL overridable). Mistral only
+ *   accepts *strict* json_schema and this schema is deliberately not strict
+ *   (view props are free-form), so this path uses JSON mode; normalizePlan()
+ *   constrains the output either way.
+ * - Else on Val Town (Deno) → shared proxy, no key needed. The import stays
+ *   dynamic so Node never tries to resolve the https URL.
+ * - Else (common Node server) → standard SDK reading OPENAI_API_KEY (and
+ *   optional OPENAI_BASE_URL).
+ */
+async function client(): Promise<AiClient> {
+  const mistralKey = readEnv("MISTRAL_API_KEY");
+  if (mistralKey) {
+    const { default: OpenAISDK } = await import("openai");
+    return {
+      client: new OpenAISDK({
+        apiKey: mistralKey,
+        baseURL: readEnv("MISTRAL_BASE_URL") ?? MISTRAL_BASE_URL,
+      }),
+      model: readEnv("MISTRAL_MODEL") ?? MISTRAL_MODEL,
+      jsonSchema: false,
+    };
+  }
+  if (typeof (globalThis as { Deno?: unknown }).Deno !== "undefined") {
+    const { ValTownOpenAI } = await import("https://esm.town/v/std/openai/main.ts");
+    return { client: new ValTownOpenAI({}) as unknown as OpenAI, model: MODEL, jsonSchema: true };
+  }
+  const { default: OpenAISDK } = await import("openai");
+  return { client: new OpenAISDK(), model: MODEL, jsonSchema: true };
+}
 
 export async function draftPlan(prompt: string, practiceId?: string): Promise<Draft | DraftFailure> {
   const transcript: Chat[] = [
@@ -181,14 +227,14 @@ export async function draftPlan(prompt: string, practiceId?: string): Promise<Dr
   ];
   const started = Date.now();
   try {
-    const response = await client().chat.completions.create({
-      model: MODEL,
+    const { client: ai, model, jsonSchema } = await client();
+    const response = await ai.chat.completions.create({
+      model,
       max_completion_tokens: 4000,
       messages: transcript as never,
-      response_format: {
-        type: "json_schema",
-        json_schema: { name: "elicitation_plan", strict: false, schema: PLAN_SCHEMA as never },
-      },
+      response_format: jsonSchema
+        ? { type: "json_schema", json_schema: { name: "elicitation_plan", strict: false, schema: PLAN_SCHEMA as never } }
+        : { type: "json_object" },
     });
     const text = response.choices?.[0]?.message?.content ?? "";
     if (!text.trim()) {
@@ -201,7 +247,7 @@ export async function draftPlan(prompt: string, practiceId?: string): Promise<Dr
     );
     return {
       plan,
-      model: MODEL,
+      model,
       ms: Date.now() - started,
       tokens: response.usage?.total_tokens ?? null,
       transcript,
@@ -368,14 +414,14 @@ export async function inventRequest(seen: string[] = []): Promise<RandomRequest 
     },
   ];
   try {
-    const response = await client().chat.completions.create({
-      model: MODEL,
+    const { client: ai, model, jsonSchema } = await client();
+    const response = await ai.chat.completions.create({
+      model,
       max_completion_tokens: 400,
       messages: transcript as never,
-      response_format: {
-        type: "json_schema",
-        json_schema: { name: "legal_request", strict: false, schema: REQUEST_SCHEMA as never },
-      },
+      response_format: jsonSchema
+        ? { type: "json_schema", json_schema: { name: "legal_request", strict: false, schema: REQUEST_SCHEMA as never } }
+        : { type: "json_object" },
     });
     const text = response.choices?.[0]?.message?.content ?? "";
     const raw = JSON.parse(text) as Record<string, unknown>;

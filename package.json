@@ -1,0 +1,32 @@
+{
+  "name": "elicitation-lab-real",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Elicitation Lab — model-drafted MCP elicitation/create forms. Runs on Val Town (main.http.ts) or on any common Node server via `npm start` (server.ts).",
+  "scripts": {
+    "start": "tsx server.ts",
+    "dev": "tsx watch server.ts",
+    "test": "deno task test",
+    "check": "deno check main.http.ts server.ts lab/model.ts lab/bindings.ts backend/*.ts scripts/*.ts",
+    "lint": "deno lint",
+    "fmt": "deno fmt --check",
+    "verify": "deno run --allow-env --allow-read --allow-import --allow-net scripts/verify-page.ts && deno run --allow-env --allow-read --allow-import --allow-net scripts/verify-render.ts && deno run --allow-env --allow-read --allow-import --allow-net scripts/check-render.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.9",
+    "@json-render/core": "0.22.0",
+    "@json-render/directives": "0.22.0",
+    "@json-render/react": "0.22.0",
+    "@json-render/shadcn": "0.22.0",
+    "hono": "4.13.12",
+    "openai": "^7.59.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

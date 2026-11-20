@@ -1,4 +1,4 @@
-import { Hono } from "npm:hono@4.13.12";
+import { Hono } from "hono";
 import { normalizePlan, validateResponse } from "../lab/model.ts";
 import { readJsonBody } from "./http_util.ts";
 
